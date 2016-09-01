@@ -16,14 +16,27 @@ def parse():
 
 
 class board:
-    def __init__(self, board, a):
+    def __init__(self, board, a, solve = None):
         self.heads = dict()
+        self.a = a
+        self.colors = set()
+        #init colors and heads dictionary
         for i in range(a):
-            self.heads[chr(ord('A')+i)] = set()
+            c = chr(ord('A')+i)
+            self.heads[c] = set()
+            self.colors.add(c)
         self.board = board
         for tup in self.getStartHeads():
             self.heads[self.board[tup[0]][tup[1]]].add(tup)
+
+        #list of colors that are connected
+        if solve:
+            self.solve = solve
+        else:
+            self.solve = set()
             
+    def getUnsolved(self):
+        return self.colors - self.solve
 
     def getStartHeads(self):
         out = list()
@@ -32,28 +45,23 @@ class board:
                 if ord('A') <= ord(self.board[x][y]) <= ord('Z'):
                     out.append((x,y))
         return out
-                
-    def move(self, color, moveX, moveY):
-        #color is uppercase
-        if self.board[moveX-1][moveY].upper() == color and moveX > 0:
-            self.board[moveX][moveY] = color.lower()
-            return True
-        elif self.board[moveX][moveY].upper() == color and moveY > 0:
-            self.board[moveX][moveY] = color.lower()
-            return True
-        elif self.board[moveX+1][moveY].upper() == color and moveX < len(self.board):
-            self.board[moveX][moveY] = color.lower()
-            return True
-        elif self.board[moveX][moveY+1].upper() == color and \
-          moveY< len(self.board[0]):
-            self.board[moveX][moveY] = color.lower()
-            return True
-        else:
-            return False
 
+    def implementConnection(self, color, connection):
+        """implements a connection and returns a new board object"""
+        #connection is a list of squares of a particular color
+        b = self.board[:]
+        for sq in connection:
+            b[sq[0]][sq[1]]  = color.lower()
+        return board(b, self.a, self.solved|set(color))
+
+
+    #TODO: not sure if this needed
+    def move(self, color, X, Y):
+        #color is uppercase
+        self.board[x][y] = color.lower()
 
     def findConnections(self,color):
-        """finds a connection between 2 heads of the same color"""
+        """finds all connections between 2 heads of the same color"""
         #color is uppercase
         #out would contain all the possible connections
         heads = self.heads[color]
@@ -93,28 +101,38 @@ class board:
         return out
 
 
-    def connectionCheck(self, connections):
-        #connections is dictionary 
-        #connections = {'A':[(0,0), ..., (3,0)], ... }
+    def connectionCheck(self, connection, color):
+        """checks if a connection is valid, True if valid"""
+        #connection = [(0,0), ..., (3,4)]
         board = self.board[:]
-        for color, connection in connections.items():
-            for tup in connection:
-                board[tup[0][tup[1]] = color.lower()
+        for tup in connection:
+            board[tup[0]][tup[1]] = color.lower()
         return self.boardCheck(board)
         
     def boardCheck(self, board):
         """returns True if the board is valid and False otherwise"""
+        #valid as in can potentially be partially solved
+
         #empty square can not be adjacent to only 1 empty square
-        #all heads must be adjacent to an empty square
         for x in range(len(board)):
             for y in range(len(board[0])):
                 if self.board[x][y] == ' ':
-                    if self.findAdjacentBoard(x,y,board).count(' ') == 1:
+                    if self.getAdjacentBoard(x,y,board).count(' ') == 1:
                         return False
-                elif color,(x,y) in heads.items():
-                    adj = self.findAdjacentBoard(x,y,board)
-                    if adj.count(' ') + adj.count(color.lower()) == 0:
-                        return False
+
+        #all heads must be adjacent to an empty square
+        for color,tup in heads.items():
+            adj = self.findAdjacentBoard(tup[0],tup[1],board)
+            if adj.count(' ') + adj.count(color.lower()) == 0:
+                return False
+        return True
+
+    def solved(self):
+        """returns True if the board is solved"""
+        for x in range(len(self.board)):
+            for y in range(len(self.board[0])):
+                if self.board[x][y] ==' ':
+                    return False
         return True
 
     def getAdjacentBoard(self, x,y,board):
@@ -152,22 +170,31 @@ class board:
     
 class solver:
     def __init__(self, board):
-        stack = deque()
-        stack.append(board)
+        #queue contains board objects
+        self.queue = deque()
+        self.queue.append(board)
 
     def solve(self):
-        while len(stack) != 0:
-            #TODO: solve the problem here lel
-            break
+        while len(self.queue) != 0:
+            temp = self.queue.popleft()
+                
+            #if solution 
+            if temp.solved():
+                return temp
+                break
+
+            
+            c = temp.getUnsolved().pop()
+
+            connections = temp.findConnections(c)
+            for connection in connections:
+                if b.connectionCheck(connection, c):
+                    self.queue.append(b.implementConnection(connection))
 
 
 if __name__ == '__main__':
     stuff = parse()
     b = board(*stuff)
-    print b
-    l = b.findConnections('A')
-    print len(l)
-    f = open('temp', 'w+')
-    for path in l:
-        f.write(str(path))
-        f.write('\n')
+    s = solver(b)
+    print s.solve()
+
