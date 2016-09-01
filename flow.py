@@ -49,10 +49,10 @@ class board:
     def implementConnection(self, color, connection):
         """implements a connection and returns a new board object"""
         #connection is a list of squares of a particular color
-        b = self.board[:]
-        for sq in connection:
+        b = [l[:] for l in self.board]
+        for sq in connection[1:-1]:
             b[sq[0]][sq[1]]  = color.lower()
-        return board(b, self.a, self.solved|set(color))
+        return board(b, self.a, self.solve|set(color))
 
 
     #TODO: not sure if this needed
@@ -121,10 +121,10 @@ class board:
                         return False
 
         #all heads must be adjacent to an empty square
-        for color,tup in heads.items():
-            adj = self.findAdjacentBoard(tup[0],tup[1],board)
-            if adj.count(' ') + adj.count(color.lower()) == 0:
-                return False
+#        for color,tup in heads.items():
+#            adj = self.findAdjacentBoard(tup[0],tup[1],board)
+#            if adj.count(' ') + adj.count(color.lower()) == 0:
+#                return False
         return True
 
     def solved(self):
@@ -176,8 +176,10 @@ class solver:
 
     def solve(self):
         while len(self.queue) != 0:
+#        for i in range(20):
+#            print '\n\n'+str(i)+'\n\n'
             temp = self.queue.popleft()
-                
+
             #if solution 
             if temp.solved():
                 return temp
@@ -185,11 +187,10 @@ class solver:
 
             
             c = temp.getUnsolved().pop()
-
             connections = temp.findConnections(c)
             for connection in connections:
-                if b.connectionCheck(connection, c):
-                    self.queue.append(b.implementConnection(connection))
+#                if b.connectionCheck(connection, c):
+                self.queue.append(temp.implementConnection(c,connection))
 
 
 if __name__ == '__main__':
