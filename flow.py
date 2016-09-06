@@ -176,8 +176,6 @@ class solver:
 
     def solve(self):
         while len(self.queue) != 0:
-#        for i in range(20):
-#            print '\n\n'+str(i)+'\n\n'
             temp = self.queue.popleft()
 
             #if solution 
@@ -189,7 +187,6 @@ class solver:
             c = temp.getUnsolved().pop()
             connections = temp.findConnections(c)
             for connection in connections:
-#                if b.connectionCheck(connection, c):
                 self.queue.append(temp.implementConnection(c,connection))
 
 

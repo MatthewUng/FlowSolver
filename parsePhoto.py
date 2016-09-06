@@ -24,11 +24,28 @@ class ImageParser:
 
         for gamerow in gamerows:
             out.append(self.sepRow(gamerow, partitions))
-        
-        return out
+        return self.colorParse(out)
 
     def colorParse(self, data):
-        pass
+        """parses a matrix of RGB tuples"""
+        count = 0
+        d = dict()
+        l = list()
+        c = ord('A')
+        for x in range(len(data)):
+            for y in range(len(data[0])):
+                if data[x][y]:
+                    if data[x][y] in l:
+                        data[x][y] = d[data[x][y]]
+                    else:
+                        l.append(data[x][y])
+                        d[data[x][y]] = chr(c)
+                        data[x][y] = d[data[x][y]]
+                        c += 1
+                        count += 1
+                else:
+                    data[x][y] = ' '
+        return data, count
 
     def sepRow(self, gamerow, partitions):
         """takes a gamerow and a list of partitions to return a list of objects"""
@@ -151,7 +168,8 @@ class ImageParser:
 
     def test(self):
     #TODO: for testing purposes
-        thing = self.parse()
+        thing, count = self.parse()
+        print count
         for row in thing:
             print row
        
@@ -180,5 +198,5 @@ def photo(matrix):
 
 if __name__ == '__main__':
     #(1440, 2560)  width x height
-    i = ImageParser(r'photos\7x7v1.png')
+    i = ImageParser(r'photos\10x10v1.png')
     i.test()
