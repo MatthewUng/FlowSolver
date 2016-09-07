@@ -1,12 +1,18 @@
 from math import sqrt
 from PIL import Image
 import os
+from collections import Counter
 
 class ImageParser:
     #(0,0,0) is black
+
+    #replaced by getOutline()
     #outline color
-    outline = (123,123,63)
-    
+    #outline = (123,123,63)
+
+    #cutoff luminosity
+    lum = 100
+
     def __init__(self, filename):
         self.name = filename
         self.directory = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +20,7 @@ class ImageParser:
         #width x height (w,h)
         self.size = self.image.size
         self.array = self.toArray(self.image)
-
+        self.outline = self.getOutline()
 
     def parse(self):
         """parses the data array"""
@@ -34,7 +40,7 @@ class ImageParser:
         c = ord('A')
         for x in range(len(data)):
             for y in range(len(data[0])):
-                if data[x][y]:
+                if data[x][y] and sum(data[x][y]) > ImageParser.lum:
                     if data[x][y] in l:
                         data[x][y] = d[data[x][y]]
                     else:
@@ -131,7 +137,7 @@ class ImageParser:
     def columnCheck(self, gameRow, i):
         """checks if the collumn i in a given is part of the partition"""
         for j in range(len(gameRow)):
-            if gameRow[j][i] != ImageParser.outline:
+            if gameRow[j][i] != self.outline:
                 return False
         return True
 
@@ -140,9 +146,21 @@ class ImageParser:
         #row is list of tuples
         #row represents a row of pixels of a photo
         row = self.array[i]
-        if row.count(ImageParser.outline) > self.size[0]/2:
+        if row.count(self.outline) > self.size[0]/2:
             return (True, i)
         else: return (False,i)
+
+    def getOutline(self):
+        """Returns the outline color"""
+        c = Counter()
+        for row in self.array:
+            most = Counter(row).most_common(1)[0][0]
+            if most != (0,0,0) and row.count(most) > len(row)/2:
+                if sum(most) < ImageParser.lum:
+                    continue
+                c.update([most])
+
+        return c.most_common(1)[0][0]
 
     def toArray(self, image):
         """converts the list of pixel values to a more useable matrix format"""
@@ -168,24 +186,9 @@ class ImageParser:
 
     def test(self):
     #TODO: for testing purposes
-        thing, count = self.parse()
-        print count
-        for row in thing:
+        for row in self.parse()[0]:
             print row
-       
-        return 
-        thing = self.parse()
-        data = [x[:] for x in self.array]
-        for i in range(len(data)):
-            for tup in thing:
-                for j in range(tup[0], tup[1]+1):
-                    data[i][j] = (256,256,256)
-        out = list()
-        for row in data:
-            out.extend(row)
-        self.image.putdata(out)
-        self.image.show()
-        
+
 def photo(matrix):
     """takes a matrix and shows the respective image"""
     h,w = len(matrix), len(matrix[0])
