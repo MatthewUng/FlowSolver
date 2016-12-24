@@ -2,6 +2,8 @@ from math import sqrt
 from PIL import Image
 import os
 from collections import Counter
+from Tkinter import Tk
+from tkFileDialog import askopenfilename
 
 class ImageParser:
     #(0,0,0) is black
@@ -13,14 +15,24 @@ class ImageParser:
     #cutoff luminosity
     lum = 100
 
-    def __init__(self, filename):
-        self.name = filename
-        self.directory = os.path.dirname(os.path.realpath(__file__))
-        self.image = Image.open(self.directory+ '\\' + filename) 
+    def __init__(self):
+        #self.directory = os.path.dirname(os.path.realpath(__file__))
+        self.name = self.getfile()
+        try:
+            self.image = Image.open(self.name)
+        except Exception as e:
+            print e
+            print "Error occurred in opening image"
+            exit()
+
         #width x height (w,h)
         self.size = self.image.size
         self.array = self.toArray(self.image)
         self.outline = self.getOutline()
+
+    def getfile(self):
+        Tk().withdraw()
+        return askopenfilename()
 
     def parse(self):
         """parses the data array"""
@@ -201,5 +213,5 @@ def photo(matrix):
 
 if __name__ == '__main__':
     #(1440, 2560)  width x height
-    i = ImageParser(r'photos\10x10v1.png')
+    i = ImageParser()
     i.test()

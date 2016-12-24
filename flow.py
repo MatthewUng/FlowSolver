@@ -54,12 +54,6 @@ class board:
             b[sq[0]][sq[1]]  = color.lower()
         return board(b, self.a, self.solve|set(color))
 
-
-    #TODO: not sure if this needed
-    def move(self, color, X, Y):
-        #color is uppercase
-        self.board[x][y] = color.lower()
-
     def findConnections(self,color):
         """finds all connections between 2 heads of the same color"""
         #color is uppercase
