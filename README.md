@@ -1,8 +1,8 @@
 # FlowSolver
 A simple program that solves the Flow mobile app game.
 
-![sample_image_1](https://github.com/MatthewUng/FlowSolver/sample1.png)
-![sample_image_2](https://github.com/MatthewUng/FlowSolver/sample2.png)
+![sample_image_1](https://github.com/MatthewUng/FlowSolver/blob/master/sample1.png)
+![sample_image_2](https://github.com/MatthewUng/FlowSolver/blob/master/sample2.png)
 
 ## Running the Program
 Run from command line
